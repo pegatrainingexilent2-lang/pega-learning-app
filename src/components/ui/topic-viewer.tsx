@@ -152,7 +152,7 @@ export function TopicViewer({ data }: TopicViewerProps) {
                 </div>
             </header>
 
-            <main className="bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-indigo-100/20 p-8 min-h-[400px]">
+            <main className="bg-white rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.05)] border border-indigo-100/30 p-8 min-h-[400px]">
                 {isEditing ? (
                     <div className="space-y-6">
                         <div className="flex items-center justify-between">

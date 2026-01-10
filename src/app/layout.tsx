@@ -55,7 +55,7 @@ export default async function RootLayout({
         <SessionProvider>
           <div className="flex h-screen overflow-hidden">
             <AppSidebar initialTopics={topicsData} />
-            <div className="flex-1 overflow-auto bg-[#f8faff] p-8">
+            <div className="flex-1 overflow-auto bg-[#f0f4f8] p-8">
               {children}
             </div>
           </div>

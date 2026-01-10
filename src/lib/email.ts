@@ -12,8 +12,8 @@ const transporter = nodemailer.createTransport({
     },
 });
 
-export async function sendAdminNotification(userDetails: { email: string; name?: string }) {
-    console.log('>>> Sending admin notification for:', userDetails.email);
+export async function sendAdminNotification(email: string, name?: string) {
+    console.log('>>> Sending admin notification for:', email);
     try {
         await transporter.sendMail({
             from: `"PegaLearn System" <${EMAIL_USER}>`,
@@ -23,8 +23,8 @@ export async function sendAdminNotification(userDetails: { email: string; name?:
                 <h2>New User Signup</h2>
                 <p>A new user has signed up and is waiting for your approval.</p>
                 <ul>
-                    <li><strong>Email:</strong> ${userDetails.email}</li>
-                    <li><strong>Name:</strong> ${userDetails.name || 'Not provided'}</li>
+                    <li><strong>Email:</strong> ${email}</li>
+                    <li><strong>Name:</strong> ${name || 'Not provided'}</li>
                 </ul>
                 <p>Login to your admin dashboard to approve them: <a href="https://pega-learning-app1.vercel.app/admin/approvals">Approve User</a></p>
             `,

@@ -43,8 +43,9 @@ export async function sendUserApprovalEmail(userEmail: string, userName: string)
 }
 
 export async function sendPasswordResetEmail(userEmail: string, resetLink: string) {
+    console.log('>>> Attempting to send reset email to:', userEmail);
     try {
-        await resend.emails.send({
+        const response = await resend.emails.send({
             from: 'PegaLearn <onboarding@resend.dev>',
             to: userEmail,
             subject: 'Reset Your Password - PegaLearn',
@@ -56,10 +57,16 @@ export async function sendPasswordResetEmail(userEmail: string, resetLink: strin
                 <p>If you didn't request this, you can safely ignore this email.</p>
                 <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;" />
                 <p style="font-size: 12px; color: #666;">If the button doesn't work, copy and paste this link into your browser:</p>
-                <p style="font-size: 12px; color: #4f46e5;">${resetLink}</p>
+                <p style="text-decoration: none; font-size: 12px; color: #4f46e5;">${resetLink}</p>
             `,
         });
-    } catch (error) {
-        console.error('Failed to send password reset email:', error);
+        console.log('>>> Resend API Response:', response);
+        if (response.error) {
+            console.error('>>> Resend Error Details:', response.error);
+            throw new Error(`Resend Error: ${response.error.message}`);
+        }
+    } catch (error: any) {
+        console.error('>>> CRITICAL: Failed to send password reset email:', error.message);
+        throw error; // Re-throw so the API route can catch it
     }
 }

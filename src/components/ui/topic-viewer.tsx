@@ -133,7 +133,7 @@ export function TopicViewer({ data }: TopicViewerProps) {
                         </div>
                     )}
                 </div>
-                <div className="flex space-x-2 border-b border-gray-200 overflow-x-auto">
+                <div className="flex space-x-2 border-b border-indigo-100/30 overflow-x-auto">
                     {tabs.map((tab) => (
                         <button
                             key={tab.id}
@@ -142,7 +142,7 @@ export function TopicViewer({ data }: TopicViewerProps) {
                                 "flex items-center gap-2 py-4 px-6 border-b-2 text-sm font-medium transition-colors relative whitespace-nowrap",
                                 activeTab === tab.id
                                     ? "border-indigo-600 text-indigo-600"
-                                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-200"
                             )}
                         >
                             <tab.icon className="w-4 h-4" />
@@ -152,7 +152,7 @@ export function TopicViewer({ data }: TopicViewerProps) {
                 </div>
             </header>
 
-            <main className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 min-h-[400px]">
+            <main className="bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-indigo-100/20 p-8 min-h-[400px]">
                 {isEditing ? (
                     <div className="space-y-6">
                         <div className="flex items-center justify-between">

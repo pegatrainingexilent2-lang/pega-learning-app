@@ -103,7 +103,7 @@ export function AppSidebar({ initialTopics }: AppSidebarProps) {
     };
 
     return (
-        <aside className="w-80 h-screen flex flex-col border-r border-gray-200 bg-gray-50/50 shrink-0">
+        <aside className="w-80 h-screen flex flex-col border-r border-indigo-100/50 bg-[#fcfdfe] shrink-0">
             <div className="p-6 flex-1 overflow-y-auto font-sans">
                 <Link href="/" className="flex items-center gap-2 font-bold text-xl text-indigo-600 mb-8">
                     <BookOpen className="w-8 h-8" />

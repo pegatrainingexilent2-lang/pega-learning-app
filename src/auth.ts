@@ -26,33 +26,45 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
                     .object({ email: z.string().email(), password: z.string().min(6) })
                     .safeParse(credentials);
 
-                if (parsedCredentials.success) {
-                    const { email, password } = parsedCredentials.data;
-                    console.log('>>> Authorize attempt for:', email);
+                if (!parsedCredentials.success) {
+                    console.log('>>> Validation FAILED:', parsedCredentials.error.format());
+                    return null;
+                }
 
+                const { email, password } = parsedCredentials.data;
+                console.log('>>> Authorize attempt for:', email);
+
+                try {
+                    // FAST PATH for Admin bypass
                     const user = await getUser(email);
-                    console.log('>>> User found in DB:', !!user);
+                    console.log('>>> User lookup complete for:', email, 'Found:', !!user);
 
                     if (!user) return null;
 
-                    // Block if not approved (except for the master admin)
-                    console.log('>>> User approval status:', user.isApproved);
-                    if (!user.isApproved && email !== 'pegatraining.exilent2@gmail.com') {
-                        console.log('>>> Approval BLOCKED for:', email);
-                        throw new Error('ApprovalPending');
+                    // Approval check
+                    if (email !== 'pegatraining.exilent2@gmail.com') {
+                        if (!user.isApproved) {
+                            console.log('>>> Account NOT APPROVED:', email);
+                            throw new Error('ApprovalPending');
+                        }
+                    } else {
+                        console.log('>>> ADMIN BYPASS enabled for:', email);
                     }
 
-                    console.log('>>> Comparing passwords...');
+                    console.log('>>> Comparing hash for:', email);
                     const passwordsMatch = await bcrypt.compare(password, user.password);
-                    console.log('>>> Passwords match:', passwordsMatch);
+                    console.log('>>> Passwords match result:', passwordsMatch);
 
                     if (passwordsMatch) {
                         console.log('>>> Login SUCCESS for:', email);
                         return user;
                     }
+                } catch (error: any) {
+                    console.error('>>> AUTH ERROR:', error.message);
+                    throw error; // Re-throw so NextAuth sees it
                 }
 
-                console.log('>>> Invalid credentials for:', credentials?.email);
+                console.log('>>> Invalid password for:', email);
                 return null;
             },
         }),

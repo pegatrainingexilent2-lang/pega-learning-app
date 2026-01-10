@@ -24,8 +24,11 @@ export default function Editor({ value, onChange }: EditorProps) {
             method: 'POST',
             body: file,
         })
-            .then(res => {
-                if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+            .then(async res => {
+                if (!res.ok) {
+                    const errBody = await res.json().catch(() => ({}));
+                    throw new Error(errBody.details || errBody.error || `Server error: ${res.status}`);
+                }
                 return res.json();
             })
             .then(data => {
@@ -47,6 +50,10 @@ export default function Editor({ value, onChange }: EditorProps) {
             .catch(err => {
                 console.error('Upload failed:', err);
                 uploadHandler(`Upload failed: ${err.message}`);
+                // If it's a 500, remind about the secret
+                if (err.message.includes("Vercel Blob")) {
+                    alert("Possible connection issue. Please ensure you have Redeployed on Vercel after creating the Blob Store.");
+                }
             });
 
         return undefined;

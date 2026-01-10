@@ -1,15 +1,14 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Crown, Check, Zap, ArrowLeft, Loader2, AlertCircle, PartyPopper } from 'lucide-react';
 import Link from 'next/link';
 
-export default function UpgradePage() {
+function UpgradeContent() {
     const { data: session, update } = useSession();
     const [isLoading, setIsLoading] = useState(false);
-    const router = useRouter();
     const searchParams = useSearchParams();
 
     const success = searchParams.get('success');
@@ -142,5 +141,17 @@ export default function UpgradePage() {
                 </div>
             </div>
         </div>
+    );
+}
+
+export default function UpgradePage() {
+    return (
+        <Suspense fallback={
+            <div className="flex items-center justify-center min-h-[50vh]">
+                <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
+            </div>
+        }>
+            <UpgradeContent />
+        </Suspense>
     );
 }

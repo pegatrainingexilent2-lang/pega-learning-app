@@ -27,8 +27,12 @@ export async function POST(request: Request): Promise<NextResponse> {
         });
 
         return NextResponse.json(blob);
-    } catch (error) {
+    } catch (error: any) {
         console.error('Upload error:', error);
-        return NextResponse.json({ error: "Failed to upload file" }, { status: 500 });
+        return NextResponse.json({
+            error: "Failed to upload file",
+            details: error.message,
+            tokenExists: !!process.env.BLOB_READ_WRITE_TOKEN
+        }, { status: 500 });
     }
 }

@@ -1,10 +1,23 @@
 import { auth } from "@/auth";
-import { topics } from "@/data/topics";
+import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { ArrowRight, Star } from "lucide-react";
 
+// Force dynamic rendering to ensure fresh content from DB is always shown
+export const dynamic = 'force-dynamic';
+
 export default async function Home() {
   const session = await auth();
+
+  // Fetch topics from DB to sync with the sidebar and learning path
+  const dbTopics = await prisma.topicSection.findMany({
+    include: {
+      subTopics: {
+        orderBy: { order: 'asc' }
+      }
+    },
+    orderBy: { order: 'asc' }
+  });
 
   return (
     <div className="space-y-12 pb-12">
@@ -21,7 +34,7 @@ export default async function Home() {
             <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
             Pega 25.1 Infinity
           </div>
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-4 drop-shadow-lg">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-4 drop-shadow-lg text-white">
             {session?.user ? `Welcome back, ${session.user.name}` : "Master Pega 25.1"}
           </h1>
           <p className="text-lg md:text-xl text-indigo-100 max-w-2xl mb-8 drop-shadow-md">
@@ -30,12 +43,14 @@ export default async function Home() {
               : "A comprehensive guide to becoming a Pega architect, covering everything from fundamentals to Constellation and advanced integration."}
           </p>
           <div className="flex gap-4">
-            <Link
-              href={`/learn/${topics[0].id}/${topics[0].subTopics[0].id}`}
-              className="px-6 py-3 bg-white text-indigo-600 font-bold rounded-xl hover:bg-gray-100 transition-all shadow-xl hover:shadow-indigo-500/20 active:scale-95"
-            >
-              Get Started
-            </Link>
+            {dbTopics.length > 0 && dbTopics[0].subTopics.length > 0 && (
+              <Link
+                href={`/learn/${dbTopics[0].id}/${dbTopics[0].subTopics[0].id}`}
+                className="px-6 py-3 bg-white text-indigo-600 font-bold rounded-xl hover:bg-gray-100 transition-all shadow-xl hover:shadow-indigo-500/20 active:scale-95"
+              >
+                Get Started
+              </Link>
+            )}
           </div>
         </div>
       </section>
@@ -50,7 +65,7 @@ export default async function Home() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {topics.map((topic) => (
+          {dbTopics.map((topic) => (
             <div key={topic.id} className="group relative bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 overflow-hidden hover:-translate-y-1">
               <div className="p-6">
                 <div className="w-12 h-12 bg-indigo-50 rounded-xl flex items-center justify-center mb-5 text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white transition-colors duration-300">
@@ -78,12 +93,14 @@ export default async function Home() {
                 </ul>
               </div>
 
-              <Link
-                href={`/learn/${topic.id}/${topic.subTopics[0].id}`}
-                className="absolute inset-0 z-10"
-              >
-                <span className="sr-only">View {topic.title}</span>
-              </Link>
+              {topic.subTopics.length > 0 && (
+                <Link
+                  href={`/learn/${topic.id}/${topic.subTopics[0].id}`}
+                  className="absolute inset-0 z-10"
+                >
+                  <span className="sr-only">View {topic.title}</span>
+                </Link>
+              )}
 
               <div className="bg-indigo-50 px-6 py-4 border-t border-indigo-100 flex items-center justify-between text-sm font-bold text-indigo-600 opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all duration-300">
                 <span>Start Module</span>

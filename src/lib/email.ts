@@ -1,72 +1,85 @@
-import { Resend } from 'resend';
+import nodemailer from 'nodemailer';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-const ADMIN_EMAIL = 'pegatraining.exilent2@gmail.com';
+// Use environment variables for sensitive info
+const EMAIL_USER = process.env.EMAIL_USER; // Your Gmail: pegatraining.exilent2@gmail.com
+const EMAIL_PASS = process.env.EMAIL_PASS; // Your App Password
 
-export async function sendAdminNotification(userEmail: string, userName: string) {
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: EMAIL_USER,
+        pass: EMAIL_PASS,
+    },
+});
+
+export async function sendAdminNotification(userDetails: { email: string; name?: string }) {
+    console.log('>>> Sending admin notification for:', userDetails.email);
     try {
-        await resend.emails.send({
-            from: 'PegaLearn <onboarding@resend.dev>',
-            to: ADMIN_EMAIL,
-            subject: 'New User Signup - Approval Required',
+        await transporter.sendMail({
+            from: `"PegaLearn System" <${EMAIL_USER}>`,
+            to: EMAIL_USER,
+            subject: 'New User Signup Pending Approval - PegaLearn',
             html: `
-                <h2>New Signup Request</h2>
+                <h2>New User Signup</h2>
                 <p>A new user has signed up and is waiting for your approval.</p>
                 <ul>
-                    <li><strong>Name:</strong> ${userName}</li>
-                    <li><strong>Email:</strong> ${userEmail}</li>
+                    <li><strong>Email:</strong> ${userDetails.email}</li>
+                    <li><strong>Name:</strong> ${userDetails.name || 'Not provided'}</li>
                 </ul>
-                <p>Please log in to your dashboard to approve this user.</p>
+                <p>Login to your admin dashboard to approve them: <a href="https://pega-learning-app1.vercel.app/admin/approvals">Approve User</a></p>
             `,
         });
+        console.log('>>> Admin notification sent.');
     } catch (error) {
-        console.error('Failed to send admin notification email:', error);
+        console.error('>>> Failed to send admin notification:', error);
     }
 }
 
-export async function sendUserApprovalEmail(userEmail: string, userName: string) {
+export async function sendUserApprovalEmail(userEmail: string) {
+    console.log('>>> Sending approval email to:', userEmail);
     try {
-        await resend.emails.send({
-            from: 'PegaLearn <onboarding@resend.dev>',
+        await transporter.sendMail({
+            from: `"PegaLearn" <${EMAIL_USER}>`,
             to: userEmail,
-            subject: 'Application Approved - Welcome to PegaLearn!',
+            subject: 'Account Approved - Welcome to PegaLearn!',
             html: `
-                <h2>Congratulations ${userName}!</h2>
-                <p>Your account has been approved by the administrator.</p>
-                <p>You can now log in and start learning.</p>
-                <a href="${process.env.NEXTAUTH_URL}/login" style="padding: 10px 20px; background-color: #4f46e5; color: white; text-decoration: none; border-radius: 5px;">Login Now</a>
+                <h2>Welcome to PegaLearn!</h2>
+                <p>Great news! Your account has been approved by the administrator.</p>
+                <p>You can now log in and start your Pega 25.1 journey.</p>
+                <a href="https://pega-learning-app1.vercel.app/login" style="display: inline-block; padding: 12px 24px; background-color: #4f46e5; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; margin: 20px 0;">Login Now</a>
             `,
         });
+        console.log('>>> User approval email sent.');
     } catch (error) {
-        console.error('Failed to send user approval email:', error);
+        console.error('>>> Failed to send user approval email:', error);
     }
 }
 
 export async function sendPasswordResetEmail(userEmail: string, resetLink: string) {
-    console.log('>>> Attempting to send reset email to:', userEmail);
+    console.log('>>> Attempting to send reset email via Gmail to:', userEmail);
     try {
-        const response = await resend.emails.send({
-            from: 'PegaLearn <onboarding@resend.dev>',
+        const info = await transporter.sendMail({
+            from: `"PegaLearn Support" <${EMAIL_USER}>`,
             to: userEmail,
             subject: 'Reset Your Password - PegaLearn',
             html: `
-                <h2>Password Reset Request</h2>
-                <p>You requested to reset your password for your PegaLearn account.</p>
-                <p>Click the button below to set a new password. This link will expire in 1 hour.</p>
-                <a href="${resetLink}" style="display: inline-block; padding: 12px 24px; background-color: #4f46e5; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; margin: 20px 0;">Reset Password</a>
-                <p>If you didn't request this, you can safely ignore this email.</p>
-                <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;" />
-                <p style="font-size: 12px; color: #666;">If the button doesn't work, copy and paste this link into your browser:</p>
-                <p style="text-decoration: none; font-size: 12px; color: #4f46e5;">${resetLink}</p>
+                <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px;">
+                    <h2 style="color: #1e1b4b; margin-bottom: 24px;">Password Reset Request</h2>
+                    <p style="color: #475569; line-height: 1.6;">You requested to reset your password for your PegaLearn account.</p>
+                    <p style="color: #475569; line-height: 1.6;">Click the button below to set a new password. This link will expire in 1 hour.</p>
+                    <div style="text-align: center; margin: 32px 0;">
+                        <a href="${resetLink}" style="display: inline-block; padding: 14px 28px; background-color: #4f46e5; color: white; text-decoration: none; border-radius: 10px; font-weight: bold; font-size: 16px; box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.4);">Reset Password</a>
+                    </div>
+                    <p style="color: #94a3b8; font-size: 14px;">If you didn't request this, you can safely ignore this email.</p>
+                    <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 32px 0;" />
+                    <p style="font-size: 12px; color: #94a3b8; margin-bottom: 8px;">If the button doesn't work, copy and paste this link into your browser:</p>
+                    <p style="font-size: 12px; color: #4f46e5; word-break: break-all;">${resetLink}</p>
+                </div>
             `,
         });
-        console.log('>>> Resend API Response:', response);
-        if (response.error) {
-            console.error('>>> Resend Error Details:', response.error);
-            throw new Error(`Resend Error: ${response.error.message}`);
-        }
+        console.log('>>> Gmail Send Info:', info);
     } catch (error: any) {
-        console.error('>>> CRITICAL: Failed to send password reset email:', error.message);
-        throw error; // Re-throw so the API route can catch it
+        console.error('>>> CRITICAL: Failed to send password reset email via Gmail:', error.message);
+        throw error;
     }
 }

@@ -21,30 +21,14 @@ export default function LoginPage() {
         try {
             console.log('Login attempt started for:', email);
             // Using NextAuth client-side signIn
-            // Removing redirect: false to let NextAuth handle errors via standard redirect
+            // By default, this will redirect on success or redirect to an error page on failure
             await signIn('credentials', {
                 email,
                 password,
             });
-            // Result is not needed if redirecting
 
-            if (result?.error) {
-                console.error('SignIn error state:', result.error);
-                // Show the specific error message
-                if (result.error === 'ApprovalPending') {
-                    setError('Your account is pending administrator approval. You will receive an email once approved.');
-                } else if (result.error === 'CredentialsSignin') {
-                    setError('Invalid email or password');
-                } else {
-                    setError(result.error);
-                }
-                setIsLoading(false);
-            } else {
-                console.log('SignIn success! Redirecting...');
-                // Success
-                router.push('/');
-                router.refresh();
-            }
+            // If we reach here, NextAuth started the redirect process
+            console.log('SignIn transition started...');
         } catch (err: any) {
             console.error('Fatal Login Error:', err);
             setError('Something went wrong: ' + (err.message || 'Unknown error'));

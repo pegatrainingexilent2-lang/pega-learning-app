@@ -28,8 +28,14 @@ export default function LoginPage() {
             });
 
             if (result?.error) {
-                // Show the specific error message (e.g., "Pending approval")
-                setError(result.error === 'CredentialsSignin' ? 'Invalid email or password' : result.error);
+                // Show the specific error message
+                if (result.error === 'ApprovalPending') {
+                    setError('Your account is pending administrator approval. You will receive an email once approved.');
+                } else if (result.error === 'CredentialsSignin') {
+                    setError('Invalid email or password');
+                } else {
+                    setError('Unable to sign in. Please try again.');
+                }
                 setIsLoading(false);
             } else {
                 // Success

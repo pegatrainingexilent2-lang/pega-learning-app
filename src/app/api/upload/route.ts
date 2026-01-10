@@ -22,8 +22,12 @@ export async function POST(request: Request): Promise<NextResponse> {
             return NextResponse.json({ error: "Body is required" }, { status: 400 });
         }
 
-        const blob = await put(filename, request.body, {
+        // Add a random prefix to ensure uniqueness and prevent collisions
+        const uniqueFilename = `${Date.now()}-${filename}`;
+
+        const blob = await put(uniqueFilename, request.body, {
             access: 'public',
+            addOverwrite: true, // Allow overwriting if the name somehow collides
         });
 
         return NextResponse.json(blob);

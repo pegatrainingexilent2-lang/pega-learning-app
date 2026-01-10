@@ -20,6 +20,15 @@ export default function LoginPage() {
 
         try {
             console.log('Login attempt started for:', email);
+
+            // Set a safety timeout to refresh if it hangs too long
+            const timeout = setTimeout(() => {
+                if (isLoading) {
+                    setError('Connection timed out. Please refresh and try again.');
+                    setIsLoading(false);
+                }
+            }, 10000); // 10 seconds
+
             // Using NextAuth client-side signIn
             // By default, this will redirect on success or redirect to an error page on failure
             await signIn('credentials', {
@@ -27,6 +36,7 @@ export default function LoginPage() {
                 password,
             });
 
+            clearTimeout(timeout);
             // If we reach here, NextAuth started the redirect process
             console.log('SignIn transition started...');
         } catch (err: any) {

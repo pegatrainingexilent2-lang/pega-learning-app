@@ -69,7 +69,7 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
             },
         }),
     ],
-    secret: process.env.AUTH_SECRET,
+    secret: process.env.AUTH_SECRET || "pega-learning-app-secret-key-change-me",
     callbacks: {
         async jwt({ token, user }: any) {
             if (user) {

@@ -28,7 +28,8 @@ export default function LoginPage() {
             });
 
             if (result?.error) {
-                setError('Invalid credentials');
+                // Show the specific error message (e.g., "Pending approval")
+                setError(result.error === 'CredentialsSignin' ? 'Invalid email or password' : result.error);
                 setIsLoading(false);
             } else {
                 // Success

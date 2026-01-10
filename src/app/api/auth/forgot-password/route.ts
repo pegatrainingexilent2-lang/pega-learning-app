@@ -37,12 +37,19 @@ export async function POST(request: Request) {
 
         const resetLink = `${process.env.NEXTAUTH_URL || 'https://pega-learning-app1.vercel.app'}/reset-password?token=${token}`;
 
-        await sendPasswordResetEmail(email, resetLink);
+        console.log('>>> Triggering email utility...');
+        try {
+            await sendPasswordResetEmail(email, resetLink);
+            console.log('>>> Email utility finished successfully.');
+        } catch (emailError: any) {
+            console.error('>>> Email sending failed:', emailError.message);
+            return NextResponse.json({ error: "Email delivery failed: " + emailError.message }, { status: 500 });
+        }
 
         return NextResponse.json({ message: "If an account exists with that email, a reset link has been sent." });
 
     } catch (error: any) {
-        console.error("Forgot password error:", error);
-        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+        console.error(">>> Forgot password CRASH:", error);
+        return NextResponse.json({ error: "Server Error: " + error.message }, { status: 500 });
     }
 }

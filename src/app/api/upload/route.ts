@@ -27,7 +27,6 @@ export async function POST(request: Request): Promise<NextResponse> {
 
         const blob = await put(uniqueFilename, request.body, {
             access: 'public',
-            addOverwrite: true, // Allow overwriting if the name somehow collides
         });
 
         return NextResponse.json(blob);

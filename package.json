@@ -26,6 +26,8 @@
     "react-dom": "19.2.3",
     "react-quill-new": "^3.7.0",
     "stripe": "^20.1.2",
+    "suneditor": "^2.47.8",
+    "suneditor-react": "^3.6.1",
     "tailwind-merge": "^3.4.0",
     "zod": "^4.3.5"
   },

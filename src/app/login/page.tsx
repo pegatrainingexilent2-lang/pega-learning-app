@@ -21,12 +21,12 @@ export default function LoginPage() {
         try {
             console.log('Login attempt started for:', email);
             // Using NextAuth client-side signIn
-            const result = await signIn('credentials', {
+            // Removing redirect: false to let NextAuth handle errors via standard redirect
+            await signIn('credentials', {
                 email,
                 password,
-                redirect: false,
             });
-            console.log('SignIn result received:', result);
+            // Result is not needed if redirecting
 
             if (result?.error) {
                 console.error('SignIn error state:', result.error);

@@ -19,7 +19,7 @@ export async function POST(request: Request) {
         }
 
         // Validate allowed fields to prevent arbitrary updates
-        const allowedFields = ['explanation', 'implementation'];
+        const allowedFields = ['title', 'introduction', 'explanation', 'implementation', 'example', 'pptUrl'];
         if (!allowedFields.includes(field)) {
             return NextResponse.json({ error: "Invalid field" }, { status: 400 });
         }

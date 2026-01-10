@@ -14,14 +14,20 @@ interface EditorProps {
 
 export default function Editor({ value, onChange }: EditorProps) {
     const handleImageUploadBefore = (files: any[], info: any, uploadHandler: any) => {
+        if (!files || files.length === 0) return true;
+
         const file = files[0];
-        const filename = encodeURIComponent(file.name);
+        // Ensure we have a valid filename, especially for pasted blobs
+        const filename = encodeURIComponent(file.name || `image-${Date.now()}.png`);
 
         fetch(`/api/upload?filename=${filename}`, {
             method: 'POST',
             body: file,
         })
-            .then(res => res.json())
+            .then(res => {
+                if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+                return res.json();
+            })
             .then(data => {
                 if (data.url) {
                     const response = {
@@ -34,11 +40,13 @@ export default function Editor({ value, onChange }: EditorProps) {
                         ]
                     };
                     uploadHandler(response);
+                } else {
+                    throw new Error("No URL returned from upload");
                 }
             })
             .catch(err => {
                 console.error('Upload failed:', err);
-                uploadHandler("Upload failed");
+                uploadHandler(`Upload failed: ${err.message}`);
             });
 
         return undefined;
@@ -68,6 +76,9 @@ export default function Editor({ value, onChange }: EditorProps) {
                     ],
                     placeholder: "Start writing your content...",
                     defaultStyle: "font-family: Inter, sans-serif; font-size: 16px;",
+                    imageUploadHeader: {
+                        "Accept": "application/json"
+                    }
                 }}
             />
             <style jsx global>{`

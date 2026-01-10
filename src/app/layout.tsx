@@ -9,6 +9,13 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "Pega 25.1 Learning App",
   description: "Master Pega 25.1 from Basic to Advanced",
+  manifest: "/manifest.json",
+  themeColor: "#4f46e5",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Pega App",
+  },
 };
 
 export default function RootLayout({

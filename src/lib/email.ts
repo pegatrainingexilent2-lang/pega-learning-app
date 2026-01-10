@@ -35,7 +35,7 @@ export async function sendAdminNotification(userDetails: { email: string; name?:
     }
 }
 
-export async function sendUserApprovalEmail(userEmail: string) {
+export async function sendUserApprovalEmail(userEmail: string, userName?: string) {
     console.log('>>> Sending approval email to:', userEmail);
     try {
         await transporter.sendMail({
@@ -43,7 +43,7 @@ export async function sendUserApprovalEmail(userEmail: string) {
             to: userEmail,
             subject: 'Account Approved - Welcome to PegaLearn!',
             html: `
-                <h2>Welcome to PegaLearn!</h2>
+                <h2>Welcome to PegaLearn, ${userName || 'User'}!</h2>
                 <p>Great news! Your account has been approved by the administrator.</p>
                 <p>You can now log in and start your Pega 25.1 journey.</p>
                 <a href="https://pega-learning-app1.vercel.app/login" style="display: inline-block; padding: 12px 24px; background-color: #4f46e5; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; margin: 20px 0;">Login Now</a>

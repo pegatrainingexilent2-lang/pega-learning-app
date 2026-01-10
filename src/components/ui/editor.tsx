@@ -13,11 +13,44 @@ interface EditorProps {
 }
 
 export default function Editor({ value, onChange }: EditorProps) {
+    const handleImageUploadBefore = (files: any[], info: any, uploadHandler: any) => {
+        const file = files[0];
+        const filename = encodeURIComponent(file.name);
+
+        fetch(`/api/upload?filename=${filename}`, {
+            method: 'POST',
+            body: file,
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.url) {
+                    const response = {
+                        result: [
+                            {
+                                url: data.url,
+                                name: filename,
+                                size: file.size
+                            }
+                        ]
+                    };
+                    uploadHandler(response);
+                }
+            })
+            .catch(err => {
+                console.error('Upload failed:', err);
+                uploadHandler("Upload failed");
+            });
+
+        return undefined;
+    };
+
     return (
         <div className="bg-white text-gray-900 rounded-xl border border-gray-200 overflow-hidden shadow-sm transition-all suneditor-custom">
             <SunEditor
                 setContents={value}
                 onChange={onChange}
+                onImageUploadBefore={handleImageUploadBefore}
+                onVideoUploadBefore={handleImageUploadBefore}
                 setOptions={{
                     height: "400px",
                     buttonList: [

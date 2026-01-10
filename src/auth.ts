@@ -31,9 +31,9 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
                     const user = await getUser(email);
                     if (!user) return null;
 
-                    // Block if not approved
-                    if (!user.isApproved) {
-                        throw new Error('Your account is pending administrator approval.');
+                    // Block if not approved (except for the master admin)
+                    if (!user.isApproved && email !== 'pegatraining.exilent2@gmail.com') {
+                        throw new Error('ApprovalPending');
                     }
 
                     const passwordsMatch = await bcrypt.compare(password, user.password);

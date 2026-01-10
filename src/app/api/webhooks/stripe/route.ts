@@ -5,7 +5,8 @@ import { headers } from 'next/headers';
 
 export async function POST(req: Request) {
     const body = await req.text();
-    const signature = headers().get('Stripe-Signature') as string;
+    const headerPayload = await headers();
+    const signature = headerPayload.get('Stripe-Signature') as string;
 
     let event;
 
@@ -35,4 +36,3 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ received: true });
 }
-

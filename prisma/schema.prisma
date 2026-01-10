@@ -1,0 +1,38 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model TopicSection {
+  id        String     @id
+  title     String
+  order     Int        @default(0)
+  subTopics SubTopic[]
+}
+
+model SubTopic {
+  id             String       @id
+  title          String
+  topicSectionId String
+  topicSection   TopicSection @relation(fields: [topicSectionId], references: [id])
+  order          Int          @default(0)
+  introduction   String       @default("")
+  explanation    String       @default("")
+  implementation String       @default("")
+  example        String       @default("")
+  pptUrl         String?
+  isPremium      Boolean      @default(false)
+}
+
+model User {
+  id        String   @id @default(uuid())
+  name      String?
+  email     String   @unique
+  password  String
+  isPremium Boolean  @default(false)
+  createdAt DateTime @default(now())
+}

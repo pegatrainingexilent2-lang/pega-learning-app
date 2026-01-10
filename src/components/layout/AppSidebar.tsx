@@ -2,19 +2,22 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { topics } from "@/data/topics";
+import { TopicSection } from "@/types";
 import { cn } from "@/lib/utils";
 import { ChevronRight, BookOpen, LogOut, User, PlusCircle, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSession, signOut } from "next-auth/react";
 
-export function AppSidebar() {
+interface AppSidebarProps {
+    initialTopics: TopicSection[];
+}
+
+export function AppSidebar({ initialTopics }: AppSidebarProps) {
     const { data: session, status } = useSession();
     const pathname = usePathname();
     const router = useRouter();
-    const [openSections, setOpenSections] = useState<string[]>(topics.map(t => t.id));
-    const [isCreating, setIsCreating] = useState<string | null>(null); // 'topic' or 'subTopic' (topicId)
+    const [openSections, setOpenSections] = useState<string[]>(initialTopics.map(t => t.id));
 
     const isAdmin = session?.user?.email === 'pegatraining.exilent2@gmail.com';
 
@@ -36,7 +39,8 @@ export function AppSidebar() {
         const title = window.prompt("Enter Topic Title (e.g., Advanced Pega Concepts)");
         if (!title) return;
 
-        const id = title.toLowerCase().replace(/ /g, '-').replace(/[^\w-]/g, '');
+        // Generate a more unique ID to avoid collisions
+        const id = title.toLowerCase().replace(/ /g, '-').replace(/[^\w-]/g, '') + '-' + Math.random().toString(36).substr(2, 4);
 
         try {
             const res = await fetch('/api/topics', {
@@ -47,7 +51,6 @@ export function AppSidebar() {
 
             if (res.ok) {
                 router.refresh();
-                alert("Topic created! Refreshing...");
             } else {
                 const error = await res.json();
                 alert(`Error: ${error.error}`);
@@ -62,7 +65,8 @@ export function AppSidebar() {
         const title = window.prompt("Enter Sub-topic Title (e.g., Decision Rules)");
         if (!title) return;
 
-        const id = title.toLowerCase().replace(/ /g, '-').replace(/[^\w-]/g, '');
+        // Generate a more unique ID to avoid collisions
+        const id = title.toLowerCase().replace(/ /g, '-').replace(/[^\w-]/g, '') + '-' + Math.random().toString(36).substr(2, 4);
 
         try {
             const res = await fetch('/api/subtopics', {
@@ -73,7 +77,6 @@ export function AppSidebar() {
 
             if (res.ok) {
                 router.refresh();
-                alert("Sub-topic created! Refreshing...");
             } else {
                 const error = await res.json();
                 alert(`Error: ${error.error}`);
@@ -100,7 +103,7 @@ export function AppSidebar() {
     };
 
     return (
-        <aside className="w-80 h-screen flex flex-col border-r border-gray-200 bg-gray-50/50">
+        <aside className="w-80 h-screen flex flex-col border-r border-gray-200 bg-gray-50/50 shrink-0">
             <div className="p-6 flex-1 overflow-y-auto font-sans">
                 <Link href="/" className="flex items-center gap-2 font-bold text-xl text-indigo-600 mb-8">
                     <BookOpen className="w-8 h-8" />
@@ -108,7 +111,7 @@ export function AppSidebar() {
                 </Link>
 
                 <nav className="space-y-6">
-                    {topics.map((topic) => (
+                    {initialTopics.map((topic) => (
                         <div key={topic.id} className="space-y-2 group">
                             <div className="flex items-center justify-between group">
                                 <button

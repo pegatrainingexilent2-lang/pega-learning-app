@@ -76,7 +76,7 @@ export function TopicViewer({ data }: TopicViewerProps) {
             <header className="mb-8 font-sans">
                 <div className="flex justify-between items-start mb-2">
                     <h1 className="text-3xl font-bold text-gray-900">{data.title}</h1>
-                    {(activeTab === "explanation" || activeTab === "implementation") && (
+                    {(activeTab === "explanation" || activeTab === "implementation") && session?.user?.email === 'pegatraining.exilent2@gmail.com' && (
                         <button
                             onClick={() => setIsEditing(!isEditing)}
                             className="px-4 py-2 text-sm font-medium text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors"

@@ -1,8 +1,16 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { auth } from '@/auth';
 
 export async function POST(request: Request) {
     try {
+        const session = await auth();
+
+        // Block unauthorized access
+        if (!session?.user?.email || session.user.email !== 'pegatraining.exilent2@gmail.com') {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+
         const body = await request.json();
         const { subTopicId, field, content } = body;
 

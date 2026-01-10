@@ -23,5 +23,5 @@ export const authConfig = {
             return isLoggedIn;
         },
     },
-    secret: "pega-learning-app-secret-key-change-me",
+    secret: process.env.AUTH_SECRET,
 } satisfies NextAuthConfig;

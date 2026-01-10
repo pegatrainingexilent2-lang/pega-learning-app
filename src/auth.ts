@@ -28,24 +28,36 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
 
                 if (parsedCredentials.success) {
                     const { email, password } = parsedCredentials.data;
+                    console.log('>>> Authorize attempt for:', email);
+
                     const user = await getUser(email);
+                    console.log('>>> User found in DB:', !!user);
+
                     if (!user) return null;
 
                     // Block if not approved (except for the master admin)
+                    console.log('>>> User approval status:', user.isApproved);
                     if (!user.isApproved && email !== 'pegatraining.exilent2@gmail.com') {
+                        console.log('>>> Approval BLOCKED for:', email);
                         throw new Error('ApprovalPending');
                     }
 
+                    console.log('>>> Comparing passwords...');
                     const passwordsMatch = await bcrypt.compare(password, user.password);
-                    if (passwordsMatch) return user;
+                    console.log('>>> Passwords match:', passwordsMatch);
+
+                    if (passwordsMatch) {
+                        console.log('>>> Login SUCCESS for:', email);
+                        return user;
+                    }
                 }
 
-                console.log('Invalid credentials');
+                console.log('>>> Invalid credentials for:', credentials?.email);
                 return null;
             },
         }),
     ],
-    secret: process.env.AUTH_SECRET || "pega-learning-app-secret-key-change-me",
+    secret: process.env.AUTH_SECRET,
     callbacks: {
         async jwt({ token, user }: any) {
             if (user) {

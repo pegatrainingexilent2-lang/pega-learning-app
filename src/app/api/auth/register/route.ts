@@ -33,14 +33,24 @@ export async function POST(request: Request) {
         // Hash password
         const hashedPassword = await bcrypt.hash(password, 10);
 
+        // Auto-approve the specific admin email
+        const isApproved = email === 'pegatraining.exilent2@gmail.com';
+
         // Create user
         const user = await prisma.user.create({
             data: {
                 name,
                 email,
                 password: hashedPassword,
+                isApproved: isApproved
             },
         });
+
+        // Send notification to admin if it's a new user needing approval
+        if (!isApproved) {
+            const { sendAdminNotification } = await import('@/lib/email');
+            await sendAdminNotification(email, name);
+        }
 
         // Remove password from response
         const { password: _, ...userWithoutPassword } = user;

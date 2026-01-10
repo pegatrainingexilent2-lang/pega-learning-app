@@ -31,6 +31,11 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
                     const user = await getUser(email);
                     if (!user) return null;
 
+                    // Block if not approved
+                    if (!user.isApproved) {
+                        throw new Error('Your account is pending administrator approval.');
+                    }
+
                     const passwordsMatch = await bcrypt.compare(password, user.password);
                     if (passwordsMatch) return user;
                 }
@@ -40,17 +45,19 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
             },
         }),
     ],
-    secret: "pega-learning-app-secret-key-change-me", // Fallback secret for dev
+    secret: process.env.AUTH_SECRET || "pega-learning-app-secret-key-change-me",
     callbacks: {
         async jwt({ token, user }: any) {
             if (user) {
                 token.isPremium = (user as any).isPremium;
+                token.isApproved = (user as any).isApproved;
             }
             return token;
         },
         async session({ session, token }: any) {
             if (token && session.user) {
                 (session.user as any).isPremium = token.isPremium;
+                (session.user as any).isApproved = token.isApproved;
                 (session.user as any).id = token.sub;
             }
             return session;

@@ -100,31 +100,31 @@ export function TopicViewer({ data }: TopicViewerProps) {
     return (
         <div className="max-w-4xl mx-auto w-full pb-20">
             <header className="mb-8 font-sans">
-                <div className="flex justify-between items-start mb-2">
+                <div className="flex justify-between items-start mb-4">
                     <div className="flex-1">
                         {isEditing ? (
                             <input
                                 type="text"
                                 value={localContent.title}
                                 onChange={(e) => setLocalContent(prev => ({ ...prev, title: e.target.value }))}
-                                className="text-3xl font-bold text-gray-900 border-b border-indigo-300 outline-none w-full bg-transparent"
+                                className="text-4xl font-extrabold text-slate-900 border-b-2 border-indigo-500 outline-none w-full bg-transparent pb-1"
                             />
                         ) : (
-                            <h1 className="text-3xl font-bold text-gray-900">{data.title}</h1>
+                            <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight">{data.title}</h1>
                         )}
                     </div>
                     {isAdmin && (
                         <div className="flex gap-2">
                             <button
                                 onClick={() => setIsEditing(!isEditing)}
-                                className="px-4 py-2 text-sm font-medium text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors"
+                                className="px-4 py-2 text-sm font-bold text-indigo-600 bg-white/50 backdrop-blur-md border border-indigo-100 hover:bg-white rounded-xl transition-all shadow-sm hover:shadow-md active:scale-95"
                             >
-                                {isEditing ? "Cancel" : "Edit Content"}
+                                {isEditing ? "Cancel" : "Edit Concept"}
                             </button>
                             {!isEditing && (
                                 <button
                                     onClick={handleDeleteSubTopic}
-                                    className="p-2 text-gray-400 hover:text-red-500 rounded-lg hover:bg-red-50 transition-colors"
+                                    className="p-2 text-slate-400 hover:text-red-500 rounded-xl hover:bg-white/50 backdrop-blur-md transition-all border border-transparent hover:border-red-100"
                                     title="Delete Sub-topic"
                                 >
                                     <Trash2 size={20} />
@@ -133,26 +133,26 @@ export function TopicViewer({ data }: TopicViewerProps) {
                         </div>
                     )}
                 </div>
-                <div className="flex space-x-2 border-b border-indigo-100/30 overflow-x-auto">
+                <div className="flex space-x-1 p-1 bg-slate-200/30 backdrop-blur-md rounded-2xl w-fit">
                     {tabs.map((tab) => (
                         <button
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id)}
                             className={cn(
-                                "flex items-center gap-2 py-4 px-6 border-b-2 text-sm font-medium transition-colors relative whitespace-nowrap",
+                                "flex items-center gap-2 py-2.5 px-6 rounded-xl text-sm font-bold transition-all relative whitespace-nowrap",
                                 activeTab === tab.id
-                                    ? "border-indigo-600 text-indigo-600"
-                                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-200"
+                                    ? "bg-white text-indigo-600 shadow-sm ring-1 ring-slate-100"
+                                    : "text-slate-500 hover:text-slate-900 hover:bg-white/40"
                             )}
                         >
-                            <tab.icon className="w-4 h-4" />
+                            <tab.icon className={cn("w-4 h-4", activeTab === tab.id ? "text-indigo-600" : "text-slate-400")} />
                             {tab.label}
                         </button>
                     ))}
                 </div>
             </header>
 
-            <main className="bg-white rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.05)] border border-indigo-100/30 p-8 min-h-[400px]">
+            <main className="bg-white/70 backdrop-blur-2xl rounded-[2.5rem] shadow-[0_32px_64px_-16px_rgba(30,41,59,0.15)] border border-white/40 p-10 min-h-[500px] ring-1 ring-white/20">
                 {isEditing ? (
                     <div className="space-y-6">
                         <div className="flex items-center justify-between">

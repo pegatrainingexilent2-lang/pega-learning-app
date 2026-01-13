@@ -51,13 +51,20 @@ export default async function RootLayout({
 
   return (
     <html lang="en">
-      <body className={`${inter.className} min-h-screen bg-[#f8fafc] text-slate-900 group/body`}>
+      <body className={`${inter.className} min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50/30 to-purple-50/20 text-slate-900 group/body`}>
         <SessionProvider>
+          {/* Premium Gradient Mesh Background */}
+          <div className="gradient-mesh" />
+
+          {/* Dot Grid Pattern Overlay */}
+          <div className="fixed inset-0 dot-grid opacity-40 pointer-events-none z-0" />
+
           <div className="flex h-screen overflow-hidden relative">
-            {/* Ambient Background Blobs */}
-            <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-indigo-200/30 rounded-full blur-[120px] pointer-events-none animate-pulse" />
-            <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-200/30 rounded-full blur-[120px] pointer-events-none" style={{ animationDelay: '2s' }} />
-            <div className="absolute top-[20%] right-[10%] w-[30%] h-[30%] bg-blue-200/20 rounded-full blur-[100px] pointer-events-none" />
+            {/* Enhanced Ambient Background Blobs with better animations */}
+            <div className="absolute top-[-15%] left-[-15%] w-[50%] h-[50%] bg-gradient-to-br from-indigo-300/40 to-purple-300/30 rounded-full blur-[140px] pointer-events-none animate-pulse pulse-glow" />
+            <div className="absolute bottom-[-15%] right-[-15%] w-[50%] h-[50%] bg-gradient-to-tl from-purple-300/40 to-pink-300/30 rounded-full blur-[140px] pointer-events-none pulse-glow" style={{ animationDelay: '2s' }} />
+            <div className="absolute top-[30%] right-[15%] w-[35%] h-[35%] bg-gradient-to-br from-blue-300/30 to-cyan-300/20 rounded-full blur-[120px] pointer-events-none pulse-glow" style={{ animationDelay: '4s' }} />
+            <div className="absolute bottom-[40%] left-[20%] w-[30%] h-[30%] bg-gradient-to-tr from-violet-300/25 to-fuchsia-300/20 rounded-full blur-[100px] pointer-events-none pulse-glow" style={{ animationDelay: '6s' }} />
 
             <AppSidebar initialTopics={topicsData} />
             <div className="flex-1 overflow-auto p-8 relative z-10">

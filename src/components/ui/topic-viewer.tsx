@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { Book, Code, Lightbulb, Terminal, Trash2 } from "lucide-react";
 import Editor from "./editor";
+import { FileUpload } from "./file-upload";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
@@ -29,7 +30,8 @@ export function TopicViewer({ data }: TopicViewerProps) {
         introduction: data.content?.introduction || "",
         explanation: data.content?.explanation || "",
         implementation: data.content?.implementation || "",
-        example: data.content?.example || ""
+        example: data.content?.example || "",
+        pptUrl: data.content?.pptUrl || ""
     });
 
     // Update local state when data changes (navigation)
@@ -39,7 +41,8 @@ export function TopicViewer({ data }: TopicViewerProps) {
             introduction: data.content?.introduction || "",
             explanation: data.content?.explanation || "",
             implementation: data.content?.implementation || "",
-            example: data.content?.example || ""
+            example: data.content?.example || "",
+            pptUrl: data.content?.pptUrl || ""
         });
         setIsEditing(false);
         setActiveTab("introduction");
@@ -65,6 +68,34 @@ export function TopicViewer({ data }: TopicViewerProps) {
         } catch (error) {
             console.error(error);
             alert("Failed to save content");
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    const handlePptUrlChange = (url: string) => {
+        setLocalContent(prev => ({ ...prev, pptUrl: url }));
+    };
+
+    const handleSavePptUrl = async () => {
+        setIsSaving(true);
+        try {
+            const response = await fetch('/api/content', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    subTopicId: data.id,
+                    field: 'pptUrl',
+                    content: localContent.pptUrl
+                })
+            });
+
+            if (!response.ok) throw new Error("Failed to save PPT URL");
+
+            router.refresh();
+        } catch (error) {
+            console.error(error);
+            alert("Failed to save PPT URL");
         } finally {
             setIsSaving(false);
         }
@@ -169,6 +200,28 @@ export function TopicViewer({ data }: TopicViewerProps) {
                             value={getCurrentContent(activeTab)}
                             onChange={(val) => setLocalContent(prev => ({ ...prev, [activeTab]: val }))}
                         />
+                        
+                        {/* PDF/PPT Upload - Show in Explanation tab */}
+                        {activeTab === "explanation" && (
+                            <div className="pt-6 border-t border-gray-200">
+                                <FileUpload
+                                    currentUrl={localContent.pptUrl}
+                                    onUploadComplete={handlePptUrlChange}
+                                    acceptedTypes={[".pdf", ".ppt", ".pptx"]}
+                                    label="Upload Presentation (PDF/PPT)"
+                                />
+                                {localContent.pptUrl && localContent.pptUrl !== data.content?.pptUrl && (
+                                    <button
+                                        onClick={handleSavePptUrl}
+                                        disabled={isSaving}
+                                        className="mt-3 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-medium disabled:opacity-50 shadow-sm transition-all text-sm"
+                                    >
+                                        {isSaving ? "Saving..." : "Save PPT URL"}
+                                    </button>
+                                )}
+                            </div>
+                        )}
+                        
                         {isEditing && localContent.title !== data.title && (
                             <button
                                 onClick={() => handleSave('title', localContent.title)}

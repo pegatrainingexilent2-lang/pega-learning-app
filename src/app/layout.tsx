@@ -5,7 +5,12 @@ import { AppSidebar } from "@/components/layout/AppSidebar";
 import { SessionProvider } from "@/components/providers/SessionProvider";
 import { prisma } from "@/lib/prisma";
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+  display: "swap",
+  variable: "--font-inter"
+});
 
 export const metadata: Metadata = {
   title: "Pega 25.1 Learning App",
@@ -67,8 +72,12 @@ export default async function RootLayout({
             <div className="absolute bottom-[40%] left-[20%] w-[30%] h-[30%] bg-gradient-to-tr from-violet-300/25 to-fuchsia-300/20 rounded-full blur-[100px] pointer-events-none pulse-glow" style={{ animationDelay: '6s' }} />
 
             <AppSidebar initialTopics={topicsData} />
-            <div className="flex-1 overflow-auto p-8 relative z-10">
-              <div className="max-w-6xl mx-auto">
+            <div className="flex-1 overflow-auto p-8 relative z-10 content-area-bg">
+              {/* Content area background layers */}
+              <div className="absolute inset-0 content-gradient pointer-events-none" />
+              <div className="absolute inset-0 content-pattern opacity-20 pointer-events-none" />
+              
+              <div className="max-w-6xl mx-auto relative z-10">
                 {children}
               </div>
             </div>

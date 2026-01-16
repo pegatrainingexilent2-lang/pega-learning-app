@@ -103,12 +103,28 @@ export function AppSidebar({ initialTopics }: AppSidebarProps) {
     };
 
     return (
-        <aside className="w-80 h-screen flex flex-col border-r border-white/20 bg-gradient-to-b from-white/95 via-indigo-50/80 to-purple-50/60 backdrop-blur-xl shrink-0 relative">
+        <aside className="w-80 h-screen flex flex-col border-r border-white/30 backdrop-blur-xl shrink-0 relative overflow-hidden sidebar-bg">
+            {/* Animated gradient background */}
+            <div className="absolute inset-0 bg-gradient-to-br from-indigo-600/20 via-purple-600/15 to-pink-500/10" />
+            
+            {/* Secondary gradient layer */}
+            <div className="absolute inset-0 bg-gradient-to-t from-blue-600/15 via-transparent to-indigo-500/10" />
+            
+            {/* Pattern overlay */}
+            <div className="absolute inset-0 opacity-30 sidebar-pattern" />
+            
+            {/* Animated mesh gradient blobs */}
+            <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-purple-400/30 to-pink-400/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '0s' }} />
+            <div className="absolute bottom-0 left-0 w-80 h-80 bg-gradient-to-tr from-indigo-400/25 to-blue-400/15 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />
+            
             {/* Subtle gradient overlay */}
             <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 via-transparent to-purple-500/5 pointer-events-none" />
 
             {/* Ambient glow effect */}
             <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-indigo-200/20 to-transparent blur-2xl pointer-events-none" />
+            
+            {/* Glass morphism overlay */}
+            <div className="absolute inset-0 bg-white/10 backdrop-blur-md" />
 
             <div className="p-6 flex-1 overflow-y-auto font-sans relative z-10">
                 <Link href="/" className="flex items-center gap-3 font-bold text-xl mb-8 group">

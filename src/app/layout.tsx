@@ -73,9 +73,9 @@ export default async function RootLayout({
 
             <AppSidebar initialTopics={topicsData} />
             <div className="flex-1 overflow-auto p-8 relative z-10 content-area-bg">
-              {/* Content area background layers */}
+              {/* Content area background layers - subtle and clean */}
               <div className="absolute inset-0 content-gradient pointer-events-none" />
-              <div className="absolute inset-0 content-pattern opacity-20 pointer-events-none" />
+              <div className="absolute inset-0 content-pattern pointer-events-none" />
               
               <div className="max-w-6xl mx-auto relative z-10">
                 {children}

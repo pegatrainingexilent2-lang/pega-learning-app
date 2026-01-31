@@ -1,41 +1,44 @@
-import { put } from '@vercel/blob';
+import { handleUpload, type HandleUploadBody } from '@vercel/blob/client';
 import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
 
 export async function POST(request: Request): Promise<NextResponse> {
-    const session = await auth();
-
-    // Block unauthorized access - only admin can upload
-    if (!session?.user?.email || session.user.email !== 'pegatraining.exilent2@gmail.com') {
-        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const { searchParams } = new URL(request.url);
-    const filename = searchParams.get('filename');
-
-    if (!filename) {
-        return NextResponse.json({ error: "Filename is required" }, { status: 400 });
-    }
+    const body = (await request.json()) as HandleUploadBody;
 
     try {
-        if (!request.body) {
-            return NextResponse.json({ error: "Body is required" }, { status: 400 });
-        }
+        const jsonResponse = await handleUpload({
+            body,
+            request,
+            onBeforeGenerateToken: async (pathname) => {
+                const session = await auth();
 
-        // Add a random prefix to ensure uniqueness and prevent collisions
-        const uniqueFilename = `${Date.now()}-${filename}`;
+                // Block unauthorized access - only admin can upload
+                if (!session?.user?.email || session.user.email !== 'pegatraining.exilent2@gmail.com') {
+                    throw new Error("Unauthorized");
+                }
 
-        const blob = await put(uniqueFilename, request.body, {
-            access: 'public',
+                return {
+                    allowedContentTypes: [
+                        'application/pdf',
+                        'application/vnd.ms-powerpoint',
+                        'application/vnd.openxmlformats-officedocument.presentationml.presentation'
+                    ],
+                    tokenPayload: JSON.stringify({
+                        uploadedBy: session.user.email,
+                    }),
+                };
+            },
+            onUploadCompleted: async ({ blob, tokenPayload }) => {
+                console.log('Upload completed:', blob.url);
+            },
         });
 
-        return NextResponse.json(blob);
-    } catch (error: any) {
+        return NextResponse.json(jsonResponse);
+    } catch (error) {
         console.error('Upload error:', error);
-        return NextResponse.json({
-            error: "Failed to upload file",
-            details: error.message,
-            tokenExists: !!process.env.BLOB_READ_WRITE_TOKEN
-        }, { status: 500 });
+        return NextResponse.json(
+            { error: (error as Error).message },
+            { status: 400 },
+        );
     }
 }

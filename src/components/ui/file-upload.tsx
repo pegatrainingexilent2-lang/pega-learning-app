@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { upload } from '@vercel/blob/client';
+import { useState, useEffect, useRef } from "react";
 import { Upload, File, X, CheckCircle, Loader2 } from "lucide-react";
 
 interface FileUploadProps {
@@ -10,15 +11,16 @@ interface FileUploadProps {
     label?: string;
 }
 
-export function FileUpload({ 
-    currentUrl, 
-    onUploadComplete, 
+export function FileUpload({
+    currentUrl,
+    onUploadComplete,
     acceptedTypes = [".pdf", ".ppt", ".pptx"],
     label = "Upload PDF/PPT"
 }: FileUploadProps) {
     const [isUploading, setIsUploading] = useState(false);
     const [uploadError, setUploadError] = useState<string | null>(null);
     const [uploadedUrl, setUploadedUrl] = useState<string | null>(currentUrl || null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     // Sync with currentUrl prop changes
     useEffect(() => {
@@ -28,6 +30,9 @@ export function FileUpload({
     const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
+
+        // Reset states
+        setUploadError(null);
 
         // Validate file type
         const fileExtension = '.' + file.name.split('.').pop()?.toLowerCase();
@@ -43,25 +48,16 @@ export function FileUpload({
         }
 
         setIsUploading(true);
-        setUploadError(null);
 
         try {
-            const filename = encodeURIComponent(file.name);
-            const response = await fetch(`/api/upload?filename=${filename}`, {
-                method: 'POST',
-                body: file,
+            const newBlob = await upload(file.name, file, {
+                access: 'public',
+                handleUploadUrl: '/api/upload',
             });
 
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                throw new Error(errorData.error || errorData.details || `Upload failed: ${response.status}`);
-            }
-
-            const data = await response.json();
-            
-            if (data.url) {
-                setUploadedUrl(data.url);
-                onUploadComplete(data.url);
+            if (newBlob.url) {
+                setUploadedUrl(newBlob.url);
+                onUploadComplete(newBlob.url);
             } else {
                 throw new Error("No URL returned from upload");
             }
@@ -70,8 +66,9 @@ export function FileUpload({
             setUploadError(error.message || "Failed to upload file. Please try again.");
         } finally {
             setIsUploading(false);
-            // Reset input
-            e.target.value = '';
+            if (fileInputRef.current) {
+                fileInputRef.current.value = '';
+            }
         }
     };
 
@@ -85,7 +82,7 @@ export function FileUpload({
             <label className="block text-sm font-medium text-gray-700 mb-2">
                 {label}
             </label>
-            
+
             {uploadedUrl ? (
                 <div className="flex items-center justify-between p-4 bg-green-50 border border-green-200 rounded-lg">
                     <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -115,6 +112,7 @@ export function FileUpload({
             ) : (
                 <div className="relative">
                     <input
+                        ref={fileInputRef}
                         type="file"
                         id="file-upload"
                         accept={acceptedTypes.join(',')}
@@ -127,8 +125,8 @@ export function FileUpload({
                         className={`
                             flex items-center justify-center gap-2 p-4 border-2 border-dashed rounded-lg
                             cursor-pointer transition-all
-                            ${isUploading 
-                                ? 'border-indigo-300 bg-indigo-50 cursor-not-allowed' 
+                            ${isUploading
+                                ? 'border-indigo-300 bg-indigo-50 cursor-not-allowed'
                                 : 'border-indigo-300 hover:border-indigo-400 hover:bg-indigo-50'
                             }
                         `}

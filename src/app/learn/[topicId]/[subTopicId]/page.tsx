@@ -33,10 +33,18 @@ export default async function LearnPage({ params }: PageProps) {
             explanation: dbSubTopic.explanation,
             implementation: dbSubTopic.implementation,
             example: dbSubTopic.example,
-            pptUrl: dbSubTopic.pptUrl || undefined
+            pptUrl: dbSubTopic.pptUrl || undefined,
+            implementationPptUrl: (dbSubTopic as any).implementationPptUrl || undefined,
+            examplePptUrl: (dbSubTopic as any).examplePptUrl || undefined
         },
         isPremium: dbSubTopic.isPremium
     };
+
+    console.log(`[Server] Fetched subTopic ${subTopicId}:`, {
+        ppt: dbSubTopic.pptUrl,
+        imp: (dbSubTopic as any).implementationPptUrl,
+        exp: (dbSubTopic as any).examplePptUrl
+    });
 
     return <TopicViewer data={subTopic} />;
 }

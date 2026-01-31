@@ -3,7 +3,9 @@ export interface Content {
     explanation: string;
     implementation: string;
     example: string;
-    pptUrl?: string; // URL to the presentation file (e.g., /presentations/topic.pptx)
+    pptUrl?: string; // URL to the presentation for Explanation tab
+    implementationPptUrl?: string; // URL for Implementation tab
+    examplePptUrl?: string; // URL for Example tab
 }
 
 export interface SubTopic {

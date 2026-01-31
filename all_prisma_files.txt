@@ -1,0 +1,2 @@
+C:\AiApps\Calorie tracking app\pega-learning-app\node_modules\.prisma
+C:\AiApps\Calorie tracking app\pega-learning-app\node_modules\.prisma\client\schema.prisma

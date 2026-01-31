@@ -3,7 +3,7 @@
 import { SubTopic } from "@/types";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
-import { Book, Code, Lightbulb, Terminal, Trash2 } from "lucide-react";
+import { Book, Code, Lightbulb, Terminal, Trash2, File as FileIcon } from "lucide-react";
 import Editor from "./editor";
 import { FileUpload } from "./file-upload";
 import { useSession } from "next-auth/react";
@@ -31,7 +31,9 @@ export function TopicViewer({ data }: TopicViewerProps) {
         explanation: data.content?.explanation || "",
         implementation: data.content?.implementation || "",
         example: data.content?.example || "",
-        pptUrl: data.content?.pptUrl || ""
+        pptUrl: data.content?.pptUrl || "",
+        implementationPptUrl: data.content?.implementationPptUrl || "",
+        examplePptUrl: data.content?.examplePptUrl || ""
     });
 
     // Update local state when data changes (navigation)
@@ -42,10 +44,13 @@ export function TopicViewer({ data }: TopicViewerProps) {
             explanation: data.content?.explanation || "",
             implementation: data.content?.implementation || "",
             example: data.content?.example || "",
-            pptUrl: data.content?.pptUrl || ""
+            pptUrl: data.content?.pptUrl || "",
+            implementationPptUrl: data.content?.implementationPptUrl || "",
+            examplePptUrl: data.content?.examplePptUrl || ""
         });
         setIsEditing(false);
-        setActiveTab("introduction");
+        // Do not reset active tab to allow seamless saving experience
+        console.log("TopicViewer received new data:", data);
     }, [data]);
 
     const handleSave = async (tabId: string, content: string) => {
@@ -73,11 +78,11 @@ export function TopicViewer({ data }: TopicViewerProps) {
         }
     };
 
-    const handlePptUrlChange = (url: string) => {
-        setLocalContent(prev => ({ ...prev, pptUrl: url }));
+    const handlePptUrlChange = (field: string, url: string) => {
+        setLocalContent(prev => ({ ...prev, [field]: url }));
     };
 
-    const handleSavePptUrl = async () => {
+    const handleSavePptUrl = async (field: string) => {
         setIsSaving(true);
         try {
             const response = await fetch('/api/content', {
@@ -85,17 +90,17 @@ export function TopicViewer({ data }: TopicViewerProps) {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     subTopicId: data.id,
-                    field: 'pptUrl',
-                    content: localContent.pptUrl
+                    field: field,
+                    content: (localContent as any)[field]
                 })
             });
 
-            if (!response.ok) throw new Error("Failed to save PPT URL");
+            if (!response.ok) throw new Error(`Failed to save ${field}`);
 
             router.refresh();
         } catch (error) {
             console.error(error);
-            alert("Failed to save PPT URL");
+            alert(`Failed to save ${field}`);
         } finally {
             setIsSaving(false);
         }
@@ -200,28 +205,32 @@ export function TopicViewer({ data }: TopicViewerProps) {
                             value={getCurrentContent(activeTab)}
                             onChange={(val) => setLocalContent(prev => ({ ...prev, [activeTab]: val }))}
                         />
-                        
-                        {/* PDF/PPT Upload - Show in Explanation tab */}
-                        {activeTab === "explanation" && (
+
+                        {/* PDF/PPT Upload - Show in specific tabs */}
+                        {(activeTab === "explanation" || activeTab === "implementation" || activeTab === "example") && (
                             <div className="pt-6 border-t border-gray-200">
                                 <FileUpload
-                                    currentUrl={localContent.pptUrl}
-                                    onUploadComplete={handlePptUrlChange}
+                                    currentUrl={(localContent as any)[activeTab === "explanation" ? "pptUrl" : `${activeTab}PptUrl`]}
+                                    onUploadComplete={(url) => handlePptUrlChange(activeTab === "explanation" ? "pptUrl" : `${activeTab}PptUrl`, url)}
                                     acceptedTypes={[".pdf", ".ppt", ".pptx"]}
-                                    label="Upload Presentation (PDF/PPT)"
+                                    label={`Upload Presentation for ${activeTab.charAt(0).toUpperCase() + activeTab.slice(1)} (PDF/PPT)`}
                                 />
-                                {localContent.pptUrl && localContent.pptUrl !== data.content?.pptUrl && (
+
+                                {/* Instant Preview in Edit Mode */}
+                                <DocumentPreview url={(localContent as any)[activeTab === "explanation" ? "pptUrl" : `${activeTab}PptUrl`]} />
+
+                                {(localContent as any)[activeTab === "explanation" ? "pptUrl" : `${activeTab}PptUrl`] !== (data.content as any)[activeTab === "explanation" ? "pptUrl" : `${activeTab}PptUrl`] && (
                                     <button
-                                        onClick={handleSavePptUrl}
+                                        onClick={() => handleSavePptUrl(activeTab === "explanation" ? "pptUrl" : `${activeTab}PptUrl`)}
                                         disabled={isSaving}
                                         className="mt-3 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-medium disabled:opacity-50 shadow-sm transition-all text-sm"
                                     >
-                                        {isSaving ? "Saving..." : "Save PPT URL"}
+                                        {isSaving ? "Saving..." : "Save Presentation URL"}
                                     </button>
                                 )}
                             </div>
                         )}
-                        
+
                         {isEditing && localContent.title !== data.title && (
                             <button
                                 onClick={() => handleSave('title', localContent.title)}
@@ -260,7 +269,8 @@ export function TopicViewer({ data }: TopicViewerProps) {
                                             <Book className="w-5 h-5 text-indigo-600" />
                                             Presentation Material
                                         </h4>
-                                        <div className="bg-gradient-to-br from-indigo-50 to-white border border-indigo-100 rounded-xl p-6 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm">
+                                        <DocumentPreview url={data.content.pptUrl} />
+                                        <div className="mt-4 bg-gradient-to-br from-indigo-50 to-white border border-indigo-100 rounded-xl p-6 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm">
                                             <div>
                                                 <p className="font-medium text-indigo-900">Topic Presentation</p>
                                                 <p className="text-sm text-indigo-600/80">Download the slide deck for this topic.</p>
@@ -279,23 +289,71 @@ export function TopicViewer({ data }: TopicViewerProps) {
                         )}
 
                         {activeTab === "implementation" && (
-                            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-                                <h3 className="text-xl font-semibold mb-4 text-gray-800">Step-by-Step Implementation</h3>
-                                <div className="bg-slate-900 rounded-lg p-6 text-slate-100 font-mono text-sm whitespace-pre-wrap shadow-inner overflow-x-auto">
-                                    <div dangerouslySetInnerHTML={{ __html: getCurrentContent("implementation") }} />
+                            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-6">
+                                <div>
+                                    <h3 className="text-xl font-semibold mb-4 text-gray-800">Step-by-Step Implementation</h3>
+                                    <div className="bg-slate-900 rounded-lg p-6 text-slate-100 font-mono text-sm whitespace-pre-wrap shadow-inner overflow-x-auto">
+                                        <div dangerouslySetInnerHTML={{ __html: getCurrentContent("implementation") }} />
+                                    </div>
                                 </div>
+                                {data.content?.implementationPptUrl && (
+                                    <div className="mt-8 pt-8 border-t border-gray-100">
+                                        <h4 className="text-lg font-medium text-gray-900 mb-4 flex items-center gap-2">
+                                            <Terminal className="w-5 h-5 text-indigo-600" />
+                                            Implementation Guide
+                                        </h4>
+                                        <DocumentPreview url={data.content.implementationPptUrl} />
+                                        <div className="mt-4 bg-gradient-to-br from-indigo-50 to-white border border-indigo-100 rounded-xl p-6 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm">
+                                            <div>
+                                                <p className="font-medium text-indigo-900">Implementation Slides</p>
+                                                <p className="text-sm text-indigo-600/80">Download the technical walkthrough for this topic.</p>
+                                            </div>
+                                            <a
+                                                href={data.content.implementationPptUrl}
+                                                download
+                                                className="whitespace-nowrap inline-flex items-center gap-2 px-5 py-2.5 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition-colors shadow-sm hover:shadow active:scale-95"
+                                            >
+                                                Download Guide
+                                            </a>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         )}
 
                         {activeTab === "example" && (
-                            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-                                <h3 className="text-xl font-semibold mb-4 text-gray-800">Example & Use Case</h3>
-                                <div className="bg-white border-l-4 border-indigo-500 p-6 shadow-sm rounded-r-lg">
-                                    <div
-                                        className="text-gray-700 leading-relaxed italic"
-                                        dangerouslySetInnerHTML={{ __html: getCurrentContent("example") }}
-                                    />
+                            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-6">
+                                <div>
+                                    <h3 className="text-xl font-semibold mb-4 text-gray-800">Example & Use Case</h3>
+                                    <div className="bg-white border-l-4 border-indigo-500 p-6 shadow-sm rounded-r-lg">
+                                        <div
+                                            className="text-gray-700 leading-relaxed italic"
+                                            dangerouslySetInnerHTML={{ __html: getCurrentContent("example") }}
+                                        />
+                                    </div>
                                 </div>
+                                {data.content?.examplePptUrl && (
+                                    <div className="mt-8 pt-8 border-t border-gray-100">
+                                        <h4 className="text-lg font-medium text-gray-900 mb-4 flex items-center gap-2">
+                                            <Code className="w-5 h-5 text-indigo-600" />
+                                            Example Presentation
+                                        </h4>
+                                        <DocumentPreview url={data.content.examplePptUrl} />
+                                        <div className="mt-4 bg-gradient-to-br from-indigo-50 to-white border border-indigo-100 rounded-xl p-6 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm">
+                                            <div>
+                                                <p className="font-medium text-indigo-900">Case Study / Example</p>
+                                                <p className="text-sm text-indigo-600/80">Download the example presentation for this topic.</p>
+                                            </div>
+                                            <a
+                                                href={data.content.examplePptUrl}
+                                                download
+                                                className="whitespace-nowrap inline-flex items-center gap-2 px-5 py-2.5 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition-colors shadow-sm hover:shadow active:scale-95"
+                                            >
+                                                Download Example
+                                            </a>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         )}
                     </div>
@@ -304,3 +362,40 @@ export function TopicViewer({ data }: TopicViewerProps) {
         </div>
     );
 }
+
+function DocumentPreview({ url }: { url: string }) {
+    if (!url) return null;
+
+    const isPpt = url.toLowerCase().includes('.ppt') || url.toLowerCase().includes('.pptx');
+    const previewUrl = isPpt
+        ? `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(url)}`
+        : url;
+
+    return (
+        <div className="mt-6 rounded-xl overflow-hidden border border-gray-200 shadow-sm bg-gray-50 animate-in fade-in zoom-in-95 duration-300">
+            <div className="bg-gray-100 px-4 py-2 text-xs font-medium text-gray-500 flex justify-between items-center border-b border-gray-200">
+                <span className="flex items-center gap-1.5">
+                    <FileIcon size={12} className="text-gray-400" />
+                    Document Preview
+                </span>
+                <a
+                    href={url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-indigo-600 hover:text-indigo-700 font-bold transition-colors"
+                >
+                    Open Original View
+                </a>
+            </div>
+            <div className="relative bg-white min-h-[400px]">
+                <iframe
+                    src={previewUrl}
+                    className="w-full h-[600px] border-none"
+                    title="Document Preview"
+                />
+            </div>
+        </div>
+    );
+}
+
+

@@ -2,6 +2,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { ArrowRight, Star } from "lucide-react";
+import { TopicBrowser } from "@/components/ui/topic-browser";
 
 // Force dynamic rendering to ensure fresh content from DB is always shown
 export const dynamic = 'force-dynamic';
@@ -61,68 +62,8 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* Topics Grid */}
-      <div className="max-w-5xl mx-auto">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900">Learning Path</h2>
-            <p className="text-gray-500">Structured curriculum from beginner to advanced</p>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {dbTopics.map((topic, index) => (
-            <div
-              key={topic.id}
-              className="group relative bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 border border-white/50 overflow-hidden hover:-translate-y-2 premium-card fade-in"
-              style={{ animationDelay: `${index * 100}ms` }}
-            >
-              {/* Shimmer effect on hover */}
-              <div className="absolute inset-0 shimmer opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-
-              <div className="p-6 relative z-10">
-                <div className="w-12 h-12 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-xl flex items-center justify-center mb-5 text-indigo-600 group-hover:from-indigo-600 group-hover:to-purple-600 group-hover:text-white transition-all duration-500 shadow-md group-hover:shadow-lg group-hover:scale-110">
-                  <Star className="w-6 h-6" />
-                </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:gradient-text transition-all duration-300">
-                  {topic.title}
-                </h3>
-                <p className="text-sm text-gray-500 mb-5 font-medium">
-                  {topic.subTopics.length} Comprehensive Lessons
-                </p>
-
-                <ul className="space-y-3 mb-6">
-                  {topic.subTopics.slice(0, 3).map((sub) => (
-                    <li key={sub.id} className="text-sm text-gray-600 flex items-center gap-3 group/item">
-                      <div className="w-1.5 h-1.5 rounded-full bg-indigo-400 group-hover/item:scale-[2] group-hover/item:bg-indigo-600 transition-all duration-300"></div>
-                      <span className="group-hover/item:text-indigo-600 transition-colors duration-300">{sub.title}</span>
-                    </li>
-                  ))}
-                  {topic.subTopics.length > 3 && (
-                    <li className="text-sm text-gray-400 pl-5 italic">
-                      +{topic.subTopics.length - 3} more topics...
-                    </li>
-                  )}
-                </ul>
-              </div>
-
-              {topic.subTopics.length > 0 && (
-                <Link
-                  href={`/learn/${topic.id}/${topic.subTopics[0].id}`}
-                  className="absolute inset-0 z-10"
-                >
-                  <span className="sr-only">View {topic.title}</span>
-                </Link>
-              )}
-
-              <div className="bg-gradient-to-r from-indigo-50 to-purple-50 px-6 py-4 border-t border-indigo-100/50 flex items-center justify-between text-sm font-bold text-indigo-600 opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all duration-500">
-                <span>Start Module</span>
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
+      {/* Topics Browser */}
+      <TopicBrowser topics={dbTopics as any} />
     </div>
   );
 }
